@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +17,23 @@ namespace TaskmanWebApp
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
+
+            services.AddSpaStaticFiles(options => {
+                options.RootPath = "ClientApp";
+            });
+
+            // setup authentication using cookies
+            AuthenticationBuilder auth = services.AddAuthentication("Default");
+
+            auth.AddCookie("Default", options => {
+                options.Cookie.Name = "TaskmanAuthID";
+                options.LoginPath = "/login";
+            });
+
+
+            // setup authorization
+            services.AddAuthorization();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -28,12 +46,20 @@ namespace TaskmanWebApp
 
             app.UseRouting();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!");
-                });
+            // use authentication and authorization
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            // map all the api controller endpoints
+            app.UseEndpoints(endpoints => {
+                endpoints.MapControllers();
+            });
+
+            // use the spa in the ClientApp folder
+            app.UseSpaStaticFiles();
+            app.UseSpa(spa => {
+                spa.Options.SourcePath = "ClientApp";
+                spa.Options.DefaultPage = "index.html";
             });
         }
     }
