@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TaskmanWebApp.Scripts.Interfaces;
+using TaskmanWebApp.Scripts;
 
 namespace TaskmanWebApp
 {
@@ -19,6 +21,8 @@ namespace TaskmanWebApp
         {
             services.AddControllers();
 
+            services.AddScoped<IDataAccess, LocalDataAccess>();
+
             services.AddSpaStaticFiles(options => {
                 options.RootPath = "ClientApp";
             });
@@ -28,7 +32,9 @@ namespace TaskmanWebApp
 
             auth.AddCookie("Default", options => {
                 options.Cookie.Name = "TaskmanAuthID";
-                options.LoginPath = "/login";
+
+                // this is not right but im not sure what to do about it yet
+                options.LoginPath = "/api/login";
             });
 
 
@@ -59,7 +65,7 @@ namespace TaskmanWebApp
             app.UseSpaStaticFiles();
             app.UseSpa(spa => {
                 spa.Options.SourcePath = "ClientApp";
-                spa.Options.DefaultPage = "index.html";
+                spa.Options.DefaultPage = "/index.html";
             });
         }
     }

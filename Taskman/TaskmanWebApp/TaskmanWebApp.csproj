@@ -13,13 +13,21 @@
   </ItemGroup>
   
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.2" />
+    <PackageReference Include="Dapper" Version="2.0.78" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.14" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.5" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="5.0.5" />
   </ItemGroup>
   
   <ItemGroup>
     <Folder Include="ClientApp\assets\" />
-    <Folder Include="Models\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="TaskData.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

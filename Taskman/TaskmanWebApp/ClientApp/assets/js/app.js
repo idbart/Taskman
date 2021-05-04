@@ -3,7 +3,8 @@
 var router = VueRouter.createRouter({
 	history: VueRouter.createWebHistory(),
 	routes: [
-
+		{ path: "/", component: DashboardComponent},
+		{ path: "/login", component: LoginComponent},
 	]
 });
 
