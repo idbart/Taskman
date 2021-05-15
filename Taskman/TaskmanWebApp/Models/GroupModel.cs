@@ -8,6 +8,7 @@ namespace TaskmanWebApp.Models
     public class GroupModel
     {
         public int id { get; set; }
+        public string name { get; set; }
         public IEnumerable<UserModel> users { get; set; }
         public IEnumerable<TaskModel> tasks { get; set; }
     }

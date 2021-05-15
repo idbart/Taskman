@@ -12,6 +12,10 @@ using Microsoft.Extensions.Configuration;
 
 namespace TaskmanWebApp.Scripts
 {
+    // data access using Sqlite
+    // class used as a scoped service so db connection is handled in constructor
+    // other methods are self explanitory
+
     public class LocalDataAccess : IDataAccess
     {
         private IDbConnection _connection;
@@ -20,7 +24,9 @@ namespace TaskmanWebApp.Scripts
         {
             try
             {
+                // so this is not working, do somthing about it
                 _connection = new SqliteConnection(config.GetConnectionString("Local"));
+                _connection.Open();
             }
             catch(Exception exe)
             {
@@ -28,10 +34,25 @@ namespace TaskmanWebApp.Scripts
                 _connection = null;
             }
         }
-
-        public Task<GroupModel> GetGroupAsync(int id)
+        ~LocalDataAccess()
         {
-            throw new NotImplementedException();
+            _connection.Close();
+        }
+
+        public async Task<GroupModel> GetGroupAsync(int id)
+        {
+            string query = "SELECT * FROM groups WHERE id=@id";
+            object paramsObj = new { id };
+
+            GroupModel group = await _connection.QueryFirstAsync<GroupModel>(query, paramsObj);
+
+            query = "SELECT * FROM users WHERE gid=@id";
+            group.users = await _connection.QueryAsync<UserModel>(query, paramsObj);
+
+            query = "SELECT * FROM tasks WHERE gid=@id";
+            group.tasks = await _connection.QueryAsync<TaskModel>(query, paramsObj);
+
+            return group;
         }
 
         public Task<GroupModel> GetGroupAsync(string name)
@@ -44,22 +65,57 @@ namespace TaskmanWebApp.Scripts
             throw new NotImplementedException();
         }
 
-        public Task<UserModel> GetUserAsync(int uid)
+        public async Task<UserModel> GetUserAsync(int uid)
         {
-            throw new NotImplementedException();
+            string query = "SELECT * FROM users WHERE id=@uid";
+            object paramsObj = new { uid };
+
+            return await _connection.QueryFirstAsync<UserModel>(query, paramsObj);
         }
 
-        public Task<UserModel> GetUserAsync(string username)
+        public async Task<UserModel> GetUserAsync(string username)
         {
-            throw new NotImplementedException();
+            string query = "SELECT * FROM users WHERE username=@username";
+            object paramsObj = new { username };
+
+            try
+            {
+                return await _connection.QueryFirstAsync<UserModel>(query, paramsObj);
+            }
+            catch(Exception exe)
+            {
+                Console.WriteLine(exe.ToString());
+                return null;
+            }
         }
 
         public async Task<bool> CreateUserAsync(string username, string password)
         {
+            string query = "INSERT (username, password) INTO users VALUES (@username, @hash)";
+            object paramsObj = new { username,  hash = password};
+
+            return await _connection.ExecuteAsync(query, paramsObj) > 0;
+        }
+
+        public async Task<bool> CreateGroupAsync(string name)
+        {
+            string query = "INSERT (name) INTO groups VALUES (@name)";
+            object paramsObj = new { name };
+
+            return await _connection.ExecuteAsync(query, paramsObj) > 0;
+        }
+
+        public Task<bool> AssignUserToGroupAsync(int uid, int gid)
+        {
             throw new NotImplementedException();
         }
 
-        public Task<bool> CreateGroupAsync(string name)
+        public Task<bool> CreateTaskAsync(string description, int gid)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> UpdateTaskStatusAsync(int tid, Models.TaskStatus newStatus)
         {
             throw new NotImplementedException();
         }

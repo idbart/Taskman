@@ -2,17 +2,86 @@
 {
 	margin: 0;
 	padding: 0;
-
-	--primary-color: white;
-	--secondary-color: blue;
-	--accent-color: green;
 }
 
 :root
 {
+	font-size: 16px;
 
+	--primary-color: white;
+	--secondary-color: rgb(103, 103, 192);
+	--accent-color: rgb(155, 216, 155);
 }
 body
 {
 
+}
+
+.bg-primary
+{
+	background-color: var(--primary-color);
+}
+.bg-secondary
+{
+	background-color: var(--secondary-color);
+}
+
+
+.span
+{
+	width: 100%;
+}
+.fill
+{
+	width: 100%;
+	height: 100%;
+}
+.fill-screen
+{
+	width: 100vw;
+	height: 100vh;
+}
+.twin
+{
+	width: 50%;
+}
+
+.center 
+{
+	margin: auto;
+}
+
+.flex-row
+{
+	display: flex;
+	flex-direction: row;
+}
+.flex-column
+{
+	display: flex;
+	flex-direction: column;
+}
+.flex-center
+{
+	align-items: center;
+	justify-content: center;
+}
+
+button
+{
+	background-color: var(--secondary-color);
+	outline-color: var(--accent-color);
+	border-radius: 5px;
+
+	font-size: 1.5rem;
+	color: var(--accent-color);
+	text-transform: uppercase;
+
+	padding: 10px;
+	box-shadow: var(--accent-color) 2px 2px;
+}
+input[type = "text"], input[type = "password"]
+{
+	padding: 15px;
+	font-size: 1.25rem;
 }

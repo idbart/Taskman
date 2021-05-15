@@ -15,7 +15,10 @@ namespace TaskmanWebApp.Scripts.Interfaces
         public Task<GroupModel> GetGroupAsync(int id);
         public Task<GroupModel> GetGroupAsync(string name);
         public Task<bool> CreateGroupAsync(string name);
+        public Task<bool> AssignUserToGroupAsync(int uid, int gid);
 
         public Task<TaskModel> GetTaskAsync(int id);
+        public Task<bool> CreateTaskAsync(string description, int gid);
+        public Task<bool> UpdateTaskStatusAsync(int tid, TaskmanWebApp.Models.TaskStatus newStatus);
     }
 }

@@ -1,0 +1,4 @@
+<ListOfTaskListEntry>
+  <TaskListEntry file="" description="Fix Bcrypt library" priority="High" />
+  <TaskListEntry file="" description="Fix Sqlite connection provider" priority="High" />
+</ListOfTaskListEntry>
