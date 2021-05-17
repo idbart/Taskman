@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using TaskmanWebApp.Models;
 using TaskmanWebApp.Scripts.Interfaces;
-using BCrypt.Net;
 using System.Data.SQLite;
 using System.Data;
 using Dapper;
@@ -92,7 +91,7 @@ namespace TaskmanWebApp.Scripts
         public async Task<bool> CreateUserAsync(string username, string password)
         {
             string query = "INSERT (username, password) INTO users VALUES (@username, @hash)";
-            object paramsObj = new { username,  hash = password};
+            object paramsObj = new { username,  hash = BCrypt.Net.BCrypt.HashPassword(password, 12)};
 
             return await _connection.ExecuteAsync(query, paramsObj) > 0;
         }
