@@ -32,7 +32,7 @@ namespace TaskmanWebApp.Controllers
             {
                 // create new user principal and sign in the user
                 List<Claim> claims = new List<Claim>();
-                claims.Add(new Claim("uid", user.id.ToString()));
+                claims.Add(new Claim("id", user.id.ToString()));
                 claims.Add(new Claim("username", user.username));
 
                 ClaimsIdentity identity = new ClaimsIdentity(claims);

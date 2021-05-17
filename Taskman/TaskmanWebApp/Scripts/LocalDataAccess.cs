@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using TaskmanWebApp.Models;
 using TaskmanWebApp.Scripts.Interfaces;
 using BCrypt.Net;
-using Microsoft.Data.Sqlite;
+using System.Data.SQLite;
 using System.Data;
 using Dapper;
 using Microsoft.Extensions.Configuration;
@@ -25,7 +25,7 @@ namespace TaskmanWebApp.Scripts
             try
             {
                 // so this is not working, do somthing about it
-                _connection = new SqliteConnection(config.GetConnectionString("Local"));
+                _connection = new SQLiteConnection(config.GetConnectionString("Local"));
                 _connection.Open();
             }
             catch(Exception exe)

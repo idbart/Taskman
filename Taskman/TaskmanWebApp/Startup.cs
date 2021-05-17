@@ -28,7 +28,11 @@ namespace TaskmanWebApp
             });
 
             // setup authentication using cookies
-            AuthenticationBuilder auth = services.AddAuthentication("Default");
+            AuthenticationBuilder auth = services.AddAuthentication(options => {
+                options.DefaultScheme = "Default";
+
+                options.RequireAuthenticatedSignIn = false;
+            });
 
             auth.AddCookie("Default", options => {
                 options.Cookie.Name = "TaskmanAuthID";
