@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using TaskmanWebApp.Models;
 using TaskmanWebApp.Scripts.Interfaces;
+using BCrypt.Net;
 
 namespace TaskmanWebApp.Controllers
 {
@@ -27,8 +28,8 @@ namespace TaskmanWebApp.Controllers
             UserModel user = await _dataAccess.GetUserAsync(claim.username);
 
             // if the db returns nothing, do the same to the client beacuse screw that guy
-            // test the password (this will need to be hashed for comparison)
-            if(user != null && claim.password == user.password)
+            // test the password
+            if (user != null && BCrypt.Net.BCrypt.Verify(claim.password, user.password))
             {
                 // create new user principal and sign in the user
                 List<Claim> claims = new List<Claim>();
@@ -54,6 +55,36 @@ namespace TaskmanWebApp.Controllers
         public async Task Logout()
         {
             await HttpContext.SignOutAsync();
+        }
+
+        [HttpPost("/api/signup")]
+        public async Task<UserModel> SignUp([FromBody]UserModel newUser)
+        {
+            // return if the requet is incompleate
+            if (string.IsNullOrEmpty(newUser.username) || string.IsNullOrEmpty(newUser.password))
+            {
+                HttpContext.Response.StatusCode = 402;
+                return new UserModel() { username = string.IsNullOrEmpty(newUser.username) ? "username is required" : "", password = string.IsNullOrEmpty(newUser.password) ? "password is required" : "" };
+            }
+
+            // check if a user by the same name already exists
+            if (await _dataAccess.GetUserAsync(newUser.username) == null)
+            {
+                if (await _dataAccess.CreateUserAsync(newUser.username, newUser.password))
+                {
+                    return await _dataAccess.GetUserAsync(newUser.username);
+                }
+                else
+                {
+                    HttpContext.Response.StatusCode = 402;
+                    return null;
+                }
+            }
+            else
+            {
+                HttpContext.Response.StatusCode = 402;
+                return new UserModel() { username = "user already exists" };
+            }
         }
     }
 }

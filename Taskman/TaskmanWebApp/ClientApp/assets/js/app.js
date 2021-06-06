@@ -5,6 +5,7 @@ var router = VueRouter.createRouter({
 	routes: [
 		{ path: "/", component: DashboardComponent},
 		{ path: "/login", component: LoginComponent},
+		{ path: "/signup", component: SignUpComponent }
 	]
 });
 
@@ -24,6 +25,9 @@ var app = Vue.createApp({
 
 	}
 });
+
+// add global components to app
+app.component("text-action", TextActionComponent);
 
 // tell the app to use the router
 app.use(router);
