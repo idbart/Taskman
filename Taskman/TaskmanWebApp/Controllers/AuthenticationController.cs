@@ -9,40 +9,76 @@ using System.Threading.Tasks;
 using TaskmanWebApp.Models;
 using TaskmanWebApp.Scripts.Interfaces;
 using BCrypt.Net;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace TaskmanWebApp.Controllers
 {
     public class AuthenticationController : ApiBaseController
     {
         private readonly IDataAccess _dataAccess;
+        private readonly IWebHostEnvironment _env;
 
-        public AuthenticationController(IDataAccess dataAccess)
+        public AuthenticationController(IDataAccess dataAccess, IWebHostEnvironment env)
         {
             _dataAccess = dataAccess;
+            _env = env;
+        }
+
+        [Authorize]
+        [HttpGet("/api/id")]
+        public async Task<UserModel> GetSelfAsync()
+        {
+            // return the client's user model without pasword
+            UserModel user = await _dataAccess.GetUserAsync(int.Parse(HttpContext.User.FindFirstValue("id")));
+
+            user.password = null;
+            return user;
         }
 
         [HttpPost("/api/login")]
-        public async Task<UserModel> Login([FromBody]UserModel claim)
+        public async Task<UserModel> LoginAsync([FromBody]UserModel claim)
         {
             // look for the user in the db
             UserModel user = await _dataAccess.GetUserAsync(claim.username);
 
             // if the db returns nothing, do the same to the client beacuse screw that guy
-            // test the password
-            if (user != null && BCrypt.Net.BCrypt.Verify(claim.password, user.password))
+            if (user != null)
             {
-                // create new user principal and sign in the user
-                List<Claim> claims = new List<Claim>();
-                claims.Add(new Claim("id", user.id.ToString()));
-                claims.Add(new Claim("username", user.username));
+                // test the password
+                bool passwordMatch = false;
+                try
+                {
+                    passwordMatch = BCrypt.Net.BCrypt.Verify(claim.password, user.password);
+                }
+                catch(Exception e)
+                {
+                    HttpContext.Response.StatusCode = 500;
+                    return null;
+                }
 
-                ClaimsIdentity identity = new ClaimsIdentity(claims);
-                ClaimsPrincipal principal = new ClaimsPrincipal(new ClaimsIdentity[] { identity });
+                if (passwordMatch)
+                {
+                    // create new user principal and sign in the user
+                    List<Claim> claims = new List<Claim>();
+                    claims.Add(new Claim("id", user.id.ToString()));
+                    claims.Add(new Claim("username", user.username));
 
-                await HttpContext.SignInAsync(principal);
+                    ClaimsIdentity identity = new ClaimsIdentity(claims);
+                    ClaimsPrincipal principal = new ClaimsPrincipal(new ClaimsIdentity[] { identity });
 
-                // if the sign in is sucessfull, return a new UserModel wihout the password
-                return new UserModel() { id = user.id, username = user.username };
+                    await HttpContext.SignInAsync(principal);
+
+                    // if the sign in is sucessfull, return a new UserModel wihout the password
+                    user.password = null;
+                    return user;
+                }
+                else
+                {
+                    HttpContext.Response.StatusCode = _env.IsDevelopment() ? 401 : 404;
+                    return null;
+                }
             }
             else
             {
@@ -51,19 +87,21 @@ namespace TaskmanWebApp.Controllers
             }
         }
 
+        // endpoint for the user to logout
         [HttpPost("/api/logout")]
-        public async Task Logout()
+        public async Task LogoutAsync()
         {
             await HttpContext.SignOutAsync();
         }
 
+        // endpoint for a user to create an account
         [HttpPost("/api/signup")]
-        public async Task<UserModel> SignUp([FromBody]UserModel newUser)
+        public async Task<UserModel> SignUpAsync([FromBody]UserModel newUser)
         {
             // return if the requet is incompleate
             if (string.IsNullOrEmpty(newUser.username) || string.IsNullOrEmpty(newUser.password))
             {
-                HttpContext.Response.StatusCode = 402;
+                HttpContext.Response.StatusCode = 400;
                 return new UserModel() { username = string.IsNullOrEmpty(newUser.username) ? "username is required" : "", password = string.IsNullOrEmpty(newUser.password) ? "password is required" : "" };
             }
 
@@ -72,17 +110,20 @@ namespace TaskmanWebApp.Controllers
             {
                 if (await _dataAccess.CreateUserAsync(newUser.username, newUser.password))
                 {
-                    return await _dataAccess.GetUserAsync(newUser.username);
+                    UserModel user = await _dataAccess.GetUserAsync(newUser.username);
+                    user.password = null;
+
+                    return user;
                 }
                 else
                 {
-                    HttpContext.Response.StatusCode = 402;
+                    HttpContext.Response.StatusCode = 500;
                     return null;
                 }
             }
             else
             {
-                HttpContext.Response.StatusCode = 402;
+                HttpContext.Response.StatusCode = 400;
                 return new UserModel() { username = "user already exists" };
             }
         }

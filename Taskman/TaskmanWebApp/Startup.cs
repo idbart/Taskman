@@ -38,6 +38,7 @@ namespace TaskmanWebApp
                 options.Cookie.Name = "TaskmanAuthID";
 
                 // this is not right but im not sure what to do about it yet
+                // wait, yes it is?
                 options.LoginPath = "/api/login";
             });
 

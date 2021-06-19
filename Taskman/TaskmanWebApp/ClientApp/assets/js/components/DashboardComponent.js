@@ -12,12 +12,13 @@ const DashboardComponent = {
 					<h3>Active Tasks:</h3>
 					<div class="task-item flex-row" v-for="task in tasks" v-bind:key="task.id">
 						<p>{{ task.description }}</p>
-						
+						<button v-if="task.status != 2" >Complete!</button>
 					</div>
 				</div>
 			</div>
 
 			<div id="group-wrapper">
+				
 			</div>
 		</div>
 	`,

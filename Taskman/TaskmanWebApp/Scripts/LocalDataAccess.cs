@@ -40,18 +40,26 @@ namespace TaskmanWebApp.Scripts
 
         public async Task<GroupModel> GetGroupAsync(int id)
         {
-            string query = "SELECT * FROM groups WHERE id=@id";
-            object paramsObj = new { id };
+            // check if gid is > 1 because 1 is the id of the default group and there is no group 0
+            if (id > 1)
+            {
+                string query = "SELECT * FROM groups WHERE id=@id";
+                object paramsObj = new { id };
 
-            GroupModel group = await _connection.QueryFirstAsync<GroupModel>(query, paramsObj);
+                GroupModel group = await _connection.QueryFirstAsync<GroupModel>(query, paramsObj);
 
-            query = "SELECT * FROM users WHERE gid=@id";
-            group.users = await _connection.QueryAsync<UserModel>(query, paramsObj);
+                query = "SELECT (id, username, gid) FROM users WHERE gid=@id";
+                group.users = await _connection.QueryAsync<UserModel>(query, paramsObj);
 
-            query = "SELECT * FROM tasks WHERE gid=@id";
-            group.tasks = await _connection.QueryAsync<TaskModel>(query, paramsObj);
+                query = "SELECT * FROM tasks WHERE gid=@id";
+                group.tasks = await _connection.QueryAsync<TaskModel>(query, paramsObj);
 
-            return group;
+                return group;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public Task<GroupModel> GetGroupAsync(string name)
