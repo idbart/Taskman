@@ -11,5 +11,10 @@ namespace TaskmanWebApp.Models
         public int id { get; set; }
         public TaskStatus status { get; set; }
         public string description { get; set; }
+
+        public TaskModel()
+        {
+            this.status = TaskStatus.Idle;
+        }
     }
 }

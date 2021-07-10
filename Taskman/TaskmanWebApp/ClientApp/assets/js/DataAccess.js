@@ -2,7 +2,7 @@ const DataAccess = {
 	tryGetSelf: function() {
 		return new Promise(async (resolve, reject) => {
 
-			var result = await fetch('/api/id');
+			var result = await fetch('api/id');
 
 			if(result.status == 200)
 			{
@@ -47,6 +47,29 @@ const DataAccess = {
 			else
 			{
 				reject("must provide group id");
+			}
+		});
+	},
+	createTask: function(gid, task) {
+		return new Promise(async (resolve, reject) => {
+
+			var result = await fetch(`api/groups/${gid}/tasks/create`, {
+				headers: {
+					"Content-Type": "application/json"
+				},
+				method: "POST",
+				body: JSON.stringify(task)
+			});
+	
+			// just return true is response in 200 and false if not for now
+			// eventually this should return more detail if response is not 200
+			if (result.status == 200)
+			{
+				resolve(true);
+			}
+			else
+			{
+				resolve(false);
 			}
 		});
 	}

@@ -30,6 +30,8 @@ namespace TaskmanWebApp.Controllers
         [HttpGet("/api/id")]
         public async Task<UserModel> GetSelfAsync()
         {
+            Console.WriteLine("user getiing self");
+
             // return the client's user model without pasword
             UserModel user = await _dataAccess.GetUserAsync(int.Parse(HttpContext.User.FindFirstValue("id")));
 
@@ -65,12 +67,12 @@ namespace TaskmanWebApp.Controllers
                     claims.Add(new Claim("id", user.id.ToString()));
                     claims.Add(new Claim("username", user.username));
 
-                    ClaimsIdentity identity = new ClaimsIdentity(claims);
+                    ClaimsIdentity identity = new ClaimsIdentity(claims, "Default");
                     ClaimsPrincipal principal = new ClaimsPrincipal(new ClaimsIdentity[] { identity });
 
                     await HttpContext.SignInAsync(principal);
 
-                    // if the sign in is sucessfull, return a new UserModel wihout the password
+                    // if the sign in is sucessfull, return a new UserModel without the password
                     user.password = null;
                     return user;
                 }

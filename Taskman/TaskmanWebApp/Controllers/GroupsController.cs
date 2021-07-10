@@ -65,6 +65,13 @@ namespace TaskmanWebApp.Controllers
             }
         }
 
+        // search for groups
+        [HttpGet("{query}")]
+        public async Task<IEnumerable<GroupModel>> SearchForGroup(string query)
+        {
+
+        }
+
         // get the tasks for a group
         [HttpGet("{id:int}/tasks")]
         public async Task<IEnumerable<TaskModel>> GetGroupTasksAsync(int id)

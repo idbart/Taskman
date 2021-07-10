@@ -35,7 +35,7 @@ namespace TaskmanWebApp.Scripts
         }
         ~LocalDataAccess()
         {
-            _connection.Close();
+            //_connection.Close();
         }
 
         public async Task<GroupModel> GetGroupAsync(int id)
@@ -98,7 +98,7 @@ namespace TaskmanWebApp.Scripts
 
         public async Task<bool> CreateUserAsync(string username, string password)
         {
-            string query = "INSERT (username, password) INTO users VALUES (@username, @hash)";
+            string query = "INSERT INTO users (username, password) VALUES (@username, @hash)";
             object paramsObj = new { username,  hash = BCrypt.Net.BCrypt.HashPassword(password, 12)};
 
             return await _connection.ExecuteAsync(query, paramsObj) > 0;

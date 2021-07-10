@@ -35,20 +35,43 @@ var store = Vuex.createStore({
 	// maybe make all these actions return Promises??
 	actions: {
 		// make a call to the /api/id server endpoint to sync the state of this client with the server
-		syncUserState: async function(context, payload) {
-			var user = await DataAccess.tryGetSelf();
-			context.commit('setUser', { newUser: user });
+		syncUserState: function(context, payload) {
+			return new Promise(async (resolve, reject) => {				
+				var user = await DataAccess.tryGetSelf();
+				context.commit('setUser', { newUser: user });
+
+				resolve();
+			});
 		},
 		// sync the state of this users group with the server
-		syncUserGroupState: async function(context, payload) {
-			var group = await DataAccess.getGroup();
-			context.commit('setGroup', { newGroup: group });
+		syncUserGroupState: function(context, payload) {
+			return new Promise(async (resolve, reject) => {
+				var group = await DataAccess.getGroup();
+				context.commit('setGroup', { newGroup: group });
+				
+				resolve();
+			});
+		},
+		// sync the group task list on this client with the server
+		syncTaskList: function(context, payload) {
+			return new Promise(async (resolve, reject) => {
+				if(context.store.group != undefined)
+				{
+					var result = await DataAccess.getGroupTasks(context.store.group.id);
+					context.commit('setGroupTaskList', { taskList: result });
+				}
+				resolve();
+			});
 		},
 
 		// sync the state of the client with the server
 		syncState: function(context, payload) {
-			context.dispatch('syncUserState');
-			context.dispatch('syncUserGroupState');
+			return new Promise(async (resolve, reject) => {
+				await context.dispatch('syncUserState');
+				await context.dispatch('syncUserGroupState');
+				
+				resolve();
+			});
 		}
 	}
 });
@@ -67,7 +90,7 @@ var app = Vue.createApp({
 	computed: {
 
 	},
-	mounted: async function() {
+	created: async function() {
 
 		await store.dispatch('syncState');
 

@@ -30,8 +30,6 @@ namespace TaskmanWebApp
             // setup authentication using cookies
             AuthenticationBuilder auth = services.AddAuthentication(options => {
                 options.DefaultScheme = "Default";
-
-                options.RequireAuthenticatedSignIn = false;
             });
 
             auth.AddCookie("Default", options => {
@@ -39,6 +37,8 @@ namespace TaskmanWebApp
 
                 // this is not right but im not sure what to do about it yet
                 // wait, yes it is?
+                // wait no its not?
+                // yes is is but it still dont work like it should
                 options.LoginPath = "/api/login";
             });
 
