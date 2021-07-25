@@ -18,7 +18,7 @@ namespace TaskmanWebApp.Controllers
             _dataAccess = dataAccess;
         }
 
-        // endpoint for the client to get model for thier group
+        // endpoint for the client to get model for their group
         [HttpGet("")]
         public async Task<GroupModel> GetClientGroupAsync()
         {
@@ -66,10 +66,11 @@ namespace TaskmanWebApp.Controllers
         }
 
         // search for groups
-        [HttpGet("{query}")]
-        public async Task<IEnumerable<GroupModel>> SearchForGroup(string query)
+        [HttpGet("search/{pattern}")]
+        public async Task<IEnumerable<GroupModel>> SearchForGroup(string pattern)
         {
-
+            IEnumerable<GroupModel> result = await _dataAccess.GetGroupsAsync(pattern);
+            return result;
         }
 
         // get the tasks for a group

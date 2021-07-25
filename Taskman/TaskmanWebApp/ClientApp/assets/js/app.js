@@ -55,7 +55,7 @@ var store = Vuex.createStore({
 		// sync the group task list on this client with the server
 		syncTaskList: function(context, payload) {
 			return new Promise(async (resolve, reject) => {
-				if(context.store.group != undefined)
+				if(context.state.group != undefined)
 				{
 					var result = await DataAccess.getGroupTasks(context.store.group.id);
 					context.commit('setGroupTaskList', { taskList: result });

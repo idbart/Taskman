@@ -1,6 +1,6 @@
 const DashboardComponent = {
 	template: `
-		<div id="dash-wrapper" class="fill-screen flex-row">
+		<div id="dash-wrapper" class="fill-screen flex-row" v-on:click="searchingForGroup = false">
 
 			<div id="tasks-wrapper" class="flex-column">
 				<template v-if="inGroup">
@@ -26,13 +26,16 @@ const DashboardComponent = {
 				<text-action btnText="Search" placeholder="search for a group" v-on:submit="searchForGroup"></text-action>
 				
 				<div v-if="searchingForGroup">
-					<div v-for="result in searchResults">
-
+					<div v-if="searchResults.length == 0">
+						<h3>No groups found!</h3> 
+					</div>
+					<div v-else v-for="result in searchResults">
+						<h3>{{ result.name }}</h3>
 					</div>
 				</div>
 
 				<div class="flex-row" v-else>
-					<h3>Users in your group:</h3>
+					<h3>Users in your group: {{ group.name }}</h3>
 					<div class="user-card span" v-for="user in memberList" v-bind:key="user.id">
 						{{ user.username }}
 					</div>
@@ -49,24 +52,27 @@ const DashboardComponent = {
 	},
 	methods: {
 		addTask: async function(newTask) {
+
+			// tell the server to add a new task to this group
 			if (await DataAccess.createTask(this.$store.state.group.id, { description: newTask}))
 			{
+				// if successful, reload the task list
 				await this.$store.dispatch('syncTaskList');
 			}
 		},
 		searchForGroup: async function(name) {
-			var group = await DataAccess.getGroup(name);
-			this.searchForGroup = true;
+			// query the server for groups 
+			var result = await DataAccess.searchGroupsByName(name);
+			// tell the ui that the search is in progress
+			this.searchingForGroup = true;
 
-			// what the hell is this?
-			// fix it
-			if (group == undefined)
+			if (result == undefined)
 			{
-
+				this.searchResults = [];
 			}
 			else
 			{
-
+				this.searchResults = result;
 			}
 		}
 	},
@@ -79,6 +85,9 @@ const DashboardComponent = {
 		},
 		inGroup: function() {
 			return this.$store.state.group != undefined;
+		},
+		group: function() {
+			return this.$store.state.group;
 		}
 	},
 	created: async function() {

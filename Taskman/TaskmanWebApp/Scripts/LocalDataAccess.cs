@@ -48,7 +48,7 @@ namespace TaskmanWebApp.Scripts
 
                 GroupModel group = await _connection.QueryFirstAsync<GroupModel>(query, paramsObj);
 
-                query = "SELECT (id, username, gid) FROM users WHERE gid=@id";
+                query = "SELECT id, username, gid FROM users WHERE gid=@id";
                 group.users = await _connection.QueryAsync<UserModel>(query, paramsObj);
 
                 query = "SELECT * FROM tasks WHERE gid=@id";
@@ -106,7 +106,7 @@ namespace TaskmanWebApp.Scripts
 
         public async Task<bool> CreateGroupAsync(string name)
         {
-            string query = "INSERT (name) INTO groups VALUES (@name)";
+            string query = "INSERT INTO groups (name) VALUES (@name)";
             object paramsObj = new { name };
 
             return await _connection.ExecuteAsync(query, paramsObj) > 0;
@@ -117,14 +117,33 @@ namespace TaskmanWebApp.Scripts
             throw new NotImplementedException();
         }
 
-        public Task<bool> CreateTaskAsync(string description, int gid)
+        public async Task<bool> CreateTaskAsync(string description, int gid)
         {
-            throw new NotImplementedException();
+            string query = "INSERT INTO tasks (description, gid) VALUES (@description, @gid)";
+            object paramsObj = new { description, gid };
+
+            return await _connection.ExecuteAsync(query, paramsObj) > 0; 
         }
 
         public Task<bool> UpdateTaskStatusAsync(int tid, Models.TaskStatus newStatus)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<GroupModel>> GetGroupsAsync(string pattern)
+        {
+            string query = $"SELECT * FROM groups WHERE name LIKE @pattern";
+            object paramsObj = new { pattern = $"%{pattern}%"};
+
+            try
+            {
+                IEnumerable<GroupModel> result = await _connection.QueryAsync<GroupModel>(query, paramsObj);
+                return result;
+            }
+            catch(Exception e)
+            {
+                return null;
+            }
         }
     }
 }
